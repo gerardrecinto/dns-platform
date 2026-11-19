@@ -33,6 +33,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - run: pip install -r requirements.txt
       - name: Converge, replicate, change, block, roll back, self-heal on real BIND9
         run: bash scripts/e2e.sh
   kubernetes-e2e:
@@ -42,6 +43,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: helm/kind-action@v1
         with: {install_only: true, version: v0.25.0}
+      - run: pip install -r requirements.txt
       - name: Bring up BIND, then a Calico kind cluster that forwards lab.example to it
         run: |
           bash scripts/e2e.sh

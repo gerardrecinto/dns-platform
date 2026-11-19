@@ -23,7 +23,8 @@ verify() { # file serial
   $P env TSIG_SECRET="$(secret)" python3 -m dnsops drift /lab/zones/.deploy.yml --primary 172.28.0.11 --secondary 172.28.0.12
 }
 
-.venv/bin/python -m dnsops lint "$ZONE"
+PY=python3; [ -x .venv/bin/python ] && PY=.venv/bin/python
+"$PY" -m dnsops lint "$ZONE"
 converge "$ZONE" "$SERIAL"
 if verify "$ZONE" "$SERIAL"; then
   cp "$ZONE" "$LKG"; echo "deployed serial $SERIAL"
