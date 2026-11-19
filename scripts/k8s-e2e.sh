@@ -3,7 +3,6 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 ok() { echo "PASS $*"; }
-docker compose up -d dns-primary dns-secondary >/dev/null
 docker compose exec -T dns-primary pgrep named >/dev/null || { echo "run scripts/e2e.sh first so BIND is serving lab.example"; exit 1; }
 
 kind delete cluster --name dns-lab >/dev/null 2>&1 || true
