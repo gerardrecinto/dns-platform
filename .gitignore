@@ -1,0 +1,8 @@
+.venv/
+.tsig.vars.yml
+.lkg.yml
+zones/.deploy.yml
+__pycache__/
+*.pyc
+.terraform/
+.terraform.lock.hcl

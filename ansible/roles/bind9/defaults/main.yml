@@ -1,0 +1,5 @@
+bind9_role: primary            # primary or secondary
+bind9_primary_ip: 172.28.0.11
+bind9_secondary_ip: 172.28.0.12
+bind9_key_name: xfer-key
+zone_serial: 2026111901        # set to a larger number on every real deploy

@@ -1,0 +1,12 @@
+; Managed by Ansible from zones/*.yml. Do not edit by hand.
+$ORIGIN {{ zone_def.zone }}
+$TTL {{ zone_def.ttl }}
+@ IN SOA {{ zone_def.soa.primary }} {{ zone_def.soa.admin }} (
+    {{ zone_serial }} ; serial
+    {{ zone_def.soa.refresh }} ; refresh
+    {{ zone_def.soa.retry }} ; retry
+    {{ zone_def.soa.expire }} ; expire
+    {{ zone_def.soa.minimum }} ) ; negative cache
+{% for r in zone_def.records %}
+{{ r.name }}{{ ' ' + (r.ttl | string) if r.ttl is defined else '' }} IN {{ r.type }} {{ ('"' + r.value + '"') if r.type == 'TXT' else r.value }}
+{% endfor %}

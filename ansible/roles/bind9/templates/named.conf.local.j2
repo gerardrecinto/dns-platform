@@ -1,0 +1,26 @@
+// Managed by Ansible.
+key "{{ bind9_key_name }}" {
+    algorithm hmac-sha256;
+    secret "{{ tsig_secret }}";
+};
+{% set zname = zone_def.zone | regex_replace('\.$', '') %}
+{% if bind9_role == "primary" %}
+
+zone "{{ zname }}" {
+    type primary;
+    file "/var/lib/bind/db.{{ zname }}";
+    notify yes;
+    also-notify { {{ bind9_secondary_ip }}; };
+    allow-transfer { key {{ bind9_key_name }}; };
+};
+{% else %}
+
+server {{ bind9_primary_ip }} { keys {{ bind9_key_name }}; };
+
+zone "{{ zname }}" {
+    type secondary;
+    primaries { {{ bind9_primary_ip }}; };
+    file "/var/lib/bind/db.{{ zname }}";
+    allow-transfer { none; };
+};
+{% endif %}

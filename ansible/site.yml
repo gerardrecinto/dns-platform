@@ -1,0 +1,7 @@
+- name: Converge a BIND9 nameserver
+  hosts: all
+  gather_facts: false
+  vars:
+    zone_file: "{{ playbook_dir }}/../zones/lab.example.yml"
+  roles:
+    - bind9

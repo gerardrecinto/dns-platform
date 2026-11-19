@@ -1,0 +1,17 @@
+{
+  "title": "DNS lab",
+  "uid": "dns-lab",
+  "schemaVersion": 39,
+  "time": {"from": "now-30m", "to": "now"},
+  "panels": [
+    {"id": 1, "type": "stat", "title": "BIND up", "gridPos": {"h": 6, "w": 8, "x": 0, "y": 0},
+     "datasource": {"type": "prometheus", "uid": "prom"},
+     "targets": [{"expr": "bind_up", "legendFormat": "{{role}}"}]},
+    {"id": 2, "type": "timeseries", "title": "Incoming queries per second", "gridPos": {"h": 8, "w": 16, "x": 8, "y": 0},
+     "datasource": {"type": "prometheus", "uid": "prom"},
+     "targets": [{"expr": "sum by (role) (rate(bind_incoming_queries_total[1m]))", "legendFormat": "{{role}}"}]},
+    {"id": 3, "type": "logs", "title": "named logs", "gridPos": {"h": 10, "w": 24, "x": 0, "y": 8},
+     "datasource": {"type": "loki", "uid": "loki"},
+     "targets": [{"expr": "{container=~\"dns-lab-.*\"}"}]}
+  ]
+}

@@ -1,0 +1,48 @@
+name: ci
+on:
+  push: {branches: [main]}
+  pull_request:
+permissions: {contents: read}
+jobs:
+  unit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install -r requirements.txt
+      - run: yamllint zones observability k8s/tenants.yaml k8s/kind.yaml .github
+      - run: python -m pytest -q
+      - name: Lint the lab zone file
+        run: python -m dnsops lint zones/lab.example.yml
+      - name: Check Prometheus alert rules
+        run: docker run --rm --entrypoint promtool -v "$PWD/observability/rules:/r" prom/prometheus:v2.55.1 check rules /r/dns.yml
+  terraform:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with: {terraform_version: 1.9.8}
+      - run: terraform fmt -check -recursive terraform
+      - working-directory: terraform
+        run: |
+          terraform init -backend=false -input=false
+          terraform validate
+          terraform test
+  bind-e2e:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Converge, replicate, change, block, roll back, self-heal on real BIND9
+        run: bash scripts/e2e.sh
+  kubernetes-e2e:
+    runs-on: ubuntu-24.04
+    needs: bind-e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: helm/kind-action@v1
+        with: {install_only: true, version: v0.25.0}
+      - name: Bring up BIND, then a Calico kind cluster that forwards lab.example to it
+        run: |
+          bash scripts/e2e.sh
+          bash scripts/k8s-e2e.sh

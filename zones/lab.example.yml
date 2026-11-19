@@ -1,0 +1,19 @@
+zone: lab.example.
+ttl: 300
+soa:
+  primary: ns1.lab.example.
+  admin: hostmaster.lab.example.
+  refresh: 60
+  retry: 30
+  expire: 604800
+  minimum: 60
+records:
+  - {name: "@", type: NS, value: ns1.lab.example.}
+  - {name: "@", type: NS, value: ns2.lab.example.}
+  - {name: ns1, type: A, value: 172.28.0.11}
+  - {name: ns2, type: A, value: 172.28.0.12}
+  - {name: api, type: A, value: 10.20.0.10, ttl: 60}
+  - {name: www, type: CNAME, value: api.lab.example.}
+  - {name: sip, type: A, value: 10.20.0.20}
+  - {name: _sip._udp, type: SRV, value: "10 60 5060 sip.lab.example."}
+  - {name: "@", type: TXT, value: "v=spf1 -all"}

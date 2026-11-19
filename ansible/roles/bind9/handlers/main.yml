@@ -1,0 +1,4 @@
+- name: reload bind
+  ansible.builtin.command: rndc reload
+  changed_when: true
+  failed_when: false   # named is not running yet on the very first converge

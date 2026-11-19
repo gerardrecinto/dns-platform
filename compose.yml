@@ -1,0 +1,55 @@
+name: dns-lab
+networks:
+  dnslab:
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
+services:
+  dns-primary:
+    build: .
+    container_name: dns-lab-primary
+    volumes: [".:/lab"]
+    networks:
+      dnslab: {ipv4_address: 172.28.0.11}
+    ports: ["5301:53/udp", "5301:53/tcp"]
+  dns-secondary:
+    build: .
+    container_name: dns-lab-secondary
+    volumes: [".:/lab"]
+    networks:
+      dnslab: {ipv4_address: 172.28.0.12}
+    ports: ["5302:53/udp", "5302:53/tcp"]
+  exporter-primary:
+    image: prometheuscommunity/bind-exporter:v0.8.0
+    command: ["--bind.stats-url=http://dns-primary:8053/", "--bind.stats-groups=server,view,tasks"]
+    networks: [dnslab]
+    profiles: [observability]
+  exporter-secondary:
+    image: prometheuscommunity/bind-exporter:v0.8.0
+    command: ["--bind.stats-url=http://dns-secondary:8053/", "--bind.stats-groups=server,view,tasks"]
+    networks: [dnslab]
+    profiles: [observability]
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    volumes: ["./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro", "./observability/rules:/etc/prometheus/rules:ro"]
+    ports: ["9090:9090"]
+    networks: [dnslab]
+    profiles: [observability]
+  loki:
+    image: grafana/loki:3.3.2
+    ports: ["3100:3100"]
+    networks: [dnslab]
+    profiles: [observability]
+  promtail:
+    image: grafana/promtail:3.3.2
+    volumes: ["./observability/promtail.yml:/etc/promtail/config.yml:ro", "/var/run/docker.sock:/var/run/docker.sock:ro"]
+    command: ["-config.file=/etc/promtail/config.yml"]
+    networks: [dnslab]
+    profiles: [observability]
+  grafana:
+    image: grafana/grafana:11.4.0
+    environment: {GF_AUTH_ANONYMOUS_ENABLED: "true", GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer}
+    volumes: ["./observability/grafana/provisioning:/etc/grafana/provisioning:ro", "./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro"]
+    ports: ["3000:3000"]
+    networks: [dnslab]
+    profiles: [observability]
