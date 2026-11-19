@@ -38,7 +38,8 @@ if kubectl -n tenant-b exec intruder -- wget -qO- -T 5 "http://$WEB_IP" >/dev/nu
 ok "tenant-b cannot reach tenant-a (NetworkPolicy enforced by Calico)"
 
 # 3. quota blocks an over-sized pod
-if kubectl -n tenant-a run hog --image=busybox:1.36 --restart=Never --overrides='{"spec":{"containers":[{"name":"hog","image":"busybox:1.36","command":["sleep","60"],"resources":{"requests":{"cpu":"2"},"limits":{"cpu":"2"}}}]}}' 2>&1 | grep -q "exceeded quota"; then ok "quota rejected a 2 CPU pod in a 500m tenant"; else echo "FAIL quota not enforced"; exit 1; fi
+out=$(kubectl -n tenant-a run hog --image=busybox:1.36 --restart=Never --overrides='{"spec":{"containers":[{"name":"hog","image":"busybox:1.36","command":["sleep","60"],"resources":{"requests":{"cpu":"2"},"limits":{"cpu":"2"}}}]}}' 2>&1 || true)
+if echo "$out" | grep -q "exceeded quota"; then ok "quota rejected a 2 CPU pod in a 500m tenant"; else echo "$out"; echo "FAIL quota not enforced"; exit 1; fi
 
 # 4. RBAC stays inside the namespace
 [ "$(kubectl auth can-i create pods -n tenant-a --as=alice --as-group=tenant-a-devs)" = yes ] && ok "tenant-a group can create pods in tenant-a"
