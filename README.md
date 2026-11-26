@@ -38,7 +38,7 @@ For monitoring: `docker compose --profile observability up -d`, then Prometheus 
 | Target | How | Status |
 |---|---|---|
 | BIND9 | `ansible/roles/bind9` renders and validates the zone | run in CI on real BIND9 |
-| Route 53, Cloud DNS, Cloudflare | `terraform/` reads the file with `yamldecode`; Cloud DNS and Cloudflare use modules from [terraform-infra-blueprints](https://github.com/gerardrecinto/terraform-infra-blueprints) | validated and plan-tested with mocked providers, never applied |
+| Route 53, Cloud DNS, Cloudflare | `terraform/` reads the file with `yamldecode`; Cloud DNS and Cloudflare use modules from [terraform-infra-blueprints](https://github.com/gerardrecinto/terraform-infra-blueprints) | validated and plan-tested with mocked providers |
 | Infoblox | `python -m dnsops infoblox-sync` reconciles A records over WAPI, dry run by default | tested against a local stub server only |
 
 ## Layout
